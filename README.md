@@ -9,6 +9,169 @@ An Open Standard for Runtime Integrity Verification
 **Date:** November 2025
 **Licence:** Apache License 2.0 — Copyright 2025 rosiea
 
+-----
+
+Of course. Here is a refined version of the summary, followed by the hyperlinked annexes.
+
+***
+
+### **SUMMARY**
+
+The **Post-Quantum Verification Layer (PQVL)** establishes a deterministic, cryptographically enforced standard for runtime integrity verification, serving as the foundational trust anchor for the post-quantum era. It replaces opaque, trust-based assumptions about execution environments with transparent, verification-based artifacts that are reproducible across any device, operating system, or deployment model.
+
+PQVL cryptographically attests that a runtime is safe for high-risk operations only when all core predicates evaluate to true:
+- **`valid_signature`** — Valid ML-DSA-65 signature
+- **`valid_tick`** — Fresh, monotonic Epoch Clock tick
+- **`valid_freshness`** — Tick within stipulated window (≤900 seconds)
+- **`valid_required_probes`** — All mandatory probes present and canonical
+- **`(drift_state == "NONE")`** — No integrity drift detected
+
+**Core Components:**
+1. **Canonical Probes** — Four required probe classes (`system_state`, `process_state`, `integrity_state`, `policy_state`) with deterministic measurement
+2. **AttestationEnvelope** — Signed aggregate of probe results with drift classification and tick binding
+3. **Drift Classification** — Deterministic rules for NONE/WARNING/CRITICAL states with fail-closed enforcement
+4. **Tick Freshness** — Epoch Clock binding for replay protection and temporal validity
+5. **Ecosystem Integration** — Authoritative runtime predicates for PQSF (`valid_runtime`), PQHD (`valid_device`), and PQAI (`valid_runtime`)
+6. **Transport & Ledger** — Secure transport (TLSE-EMP/STP) with canonical ledger events for auditability
+
+PQVL enables wallets, AI systems, and policy engines to operate exclusively under verified safe runtime conditions, making tampering, misconfiguration, and state drift detectable and cryptographically enforced.
+
+---
+
+# **INDEX**
+
+### **[ABSTRACT](#abstract)**
+
+### **[PROBLEM STATEMENT](#problem-statement)**
+
+---
+
+## **1. PURPOSE AND SCOPE (NORMATIVE)**
+
+* [1.1 Purpose](#11-purpose)
+* [1.1A Trust-Minimisation (INFORMATIVE)](#11a-trust-minimisation-informative)
+* [1.2 Scope](#12-scope)
+* [1.3 Relationship to PQSF](#13-relationship-to-pqsf)
+* [1.4 Relationship to PQHD](#14-relationship-to-pqhd)
+* [1.5 Relationship to PQAI](#15-relationship-to-pqai)
+* [1.6 Relationship to Epoch Clock](#16-relationship-to-epoch-clock)
+
+---
+
+## **2. ARCHITECTURE OVERVIEW (NORMATIVE)**
+
+* [2.1 Components](#21-components)
+* [2.2 Data Flow Overview](#22-data-flow-overview)
+* [2.3 Trust Model](#23-trust-model)
+* [2.3.1 Offline and Sovereign Operation](#231-offline-and-sovereign-operation)
+* [2.4 Device Identity Models (NORMATIVE)](#24-device-identity-models-normative)
+
+  * [2.4.1 Attested Device Identity](#241-attested-device-identity)
+  * [2.4.2 Minimal Device Identity](#242-minimal-device-identity-no-pqvl-present)
+  * [2.4.3 Identity Selection Rules](#243-identity-selection-rules)
+
+---
+
+## **3. CRYPTOGRAPHIC PRIMITIVES (NORMATIVE)**
+
+* [3.1 Signature Requirements (ML-DSA-65)](#31-signature-requirements)
+* [3.2 Hash Functions (SHAKE256-256)](#32-hash-functions)
+* [3.3 Domain Separation](#33-domain-separation)
+* [3.4 Canonical Encoding](#34-canonical-encoding)
+
+---
+
+## **4. ATTESTATION MODEL & PROBE STRUCTURES (NORMATIVE)**
+
+* [4.1 Probe Types](#41-probe-types)
+* [4.2 ProbeResult Structure](#42-proberesult-structure)
+* [4.3 AttestationEnvelope Structure](#43-attestationenvelope-structure)
+* [4.4 Attestation Validation Rules](#44-attestation-validation-rules)
+* [4.5 Required Probes per Enforcement](#45-required-probes-per-enforcement)
+
+---
+
+## **5. DRIFT CLASSIFICATION & SEMANTICS (NORMATIVE)**
+
+* [5.1 Drift States](#51-drift-states)
+* [5.2 Drift Predicate](#52-drift-predicate)
+* [5.3 Impact on Consumers](#53-impact-on-consumers)
+* [5.4 Required Probe Baseline Comparison](#54-required-probe-baseline-comparison)
+* [5.5 Drift MUST Fail-Closed](#55-drift-must-fail-closed)
+
+---
+
+## **6. PQSF INTEGRATION (NORMATIVE)**
+
+* [6.1 Probe API Integration](#61-probe-api-integration)
+* [6.2 Tick Validation](#62-tick-validation)
+* [6.3 Exporter Binding](#63-exporter-binding)
+* [6.4 Ledger Integration](#64-ledger-integration)
+* [6.5 Fail-Closed Enforcement](#65-fail-closed-enforcement)
+
+---
+
+## **7. PQHD INTEGRATION (NORMATIVE)**
+
+* [7.1 Required Condition](#71-required-condition)
+* [7.2 Continuous Predicate-Scoped Checks](#72-continuous-predicate-scoped-checks)
+* [7.3 Impact on Recovery & Secure Import](#73-impact-on-recovery--secure-import)
+* [7.4 Canonical PQVL Handling](#74-canonical-pqvl-handling)
+
+---
+
+## **8. PQAI INTEGRATION (NORMATIVE)**
+
+* [8.1 Required Condition](#81-required-condition)
+* [8.2 PQVL Enforcement During Fingerprinting](#82-pqvl-enforcement-during-fingerprinting)
+* [8.3 PQVL Enforcement During Safe-Prompt Flows](#83-pqvl-enforcement-during-safe-prompt-flows)
+* [8.4 PQAI Probe API Integration](#84-pqai-probe-api-integration)
+
+---
+
+## **9. TRANSPORT REQUIREMENTS (NORMATIVE)**
+
+* [9.1 Deterministic Transport (TLSE-EMP / STP)](#91-deterministic-transport)
+* [9.2 Offline Operation](#92-offline-operation)
+* [9.3 Stealth Mode](#93-stealth-mode)
+
+---
+
+## **10. CANONICALISATION RULES (NORMATIVE)**
+
+* [10.1 Canonical AttestationEncoding](#101-canonical-attestationencoding)
+* [10.2 Probe Canonicalisation](#102-probe-canonicalisation)
+* [10.3 Baseline Hash Canonicalisation](#103-baseline-hash-canonicalisation)
+
+---
+
+## **11. ERROR CODES (NORMATIVE)**
+
+---
+
+## **12. SECURITY CONSIDERATIONS (INFORMATIVE)**
+
+---
+
+## **13. IMPLEMENTATION NOTES (INFORMATIVE)**
+
+---
+
+## **14. BACKWARDS COMPATIBILITY (INFORMATIVE)**
+
+---
+
+# **ANNEXES**
+
+### **[ANNEX A — Probe Examples (INFORMATIVE)](#annex-a--probe-examples-informative)**
+
+### **[ANNEX B — Attestation & Drift Examples (INFORMATIVE)](#annex-b--attestation--drift-examples-informative)**
+
+### **[ANNEX C — Developer Workflow Examples (INFORMATIVE)](#annex-c--developer-workflow-examples-informative)**
+
+
+# **[ACKNOWLEDGEMENTS (INFORMATIVE)](#acknowledgements-informative)**
+
 ---
 
 # **ABSTRACT**
