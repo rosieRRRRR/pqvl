@@ -11,10 +11,6 @@ An Open Standard for Runtime Integrity Verification
 
 -----
 
-Of course. Here is a refined version of the summary, followed by the hyperlinked annexes.
-
-***
-
 ### **SUMMARY**
 
 The **Post-Quantum Verification Layer (PQVL)** establishes a deterministic, cryptographically enforced standard for runtime integrity verification, serving as the foundational trust anchor for the post-quantum era. It replaces opaque, trust-based assumptions about execution environments with transparent, verification-based artifacts that are reproducible across any device, operating system, or deployment model.
@@ -161,14 +157,13 @@ PQVL enables wallets, AI systems, and policy engines to operate exclusively unde
 
 ---
 
-# **ANNEXES**
+### **ANNEXES**
 
-### **[ANNEX A — Probe Examples (INFORMATIVE)](#annex-a--probe-examples-informative)**
+#### **[ANNEX A — Probe Examples](https://github.com/rosieRRRRR/pqvl/blob/main/docs/probe-examples.md)**
 
-### **[ANNEX B — Attestation & Drift Examples (INFORMATIVE)](#annex-b--attestation--drift-examples-informative)**
+#### **[ANNEX B — Attestation & Drift Examples](https://github.com/rosieRRRRR/pqvl/blob/main/docs/attestation-examples.md)**
 
-### **[ANNEX C — Developer Workflow Examples (INFORMATIVE)](#annex-c--developer-workflow-examples-informative)**
-
+#### **[ANNEX C — Developer Workflow Examples](https://github.com/rosieRRRRR/pqvl/blob/main/docs/developer-workflows.md)**
 
 # **[ACKNOWLEDGEMENTS (INFORMATIVE)](#acknowledgements-informative)**
 
