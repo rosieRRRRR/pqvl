@@ -157,14 +157,17 @@ PQVL enables wallets, AI systems, and policy engines to operate exclusively unde
 
 ---
 
-## **ANNEX A — Probe Examples (INFORMATIVE)**  
-[https://github.com/rosieRRRRR/pqvl#annex-a--probe-examples-informative](https://github.com/rosieRRRRR/pqvl#annex-a--probe-examples-informative)
+# **ANNEXES**
 
-## **ANNEX B — Attestation & Drift Examples (INFORMATIVE)**  
-[https://github.com/rosieRRRRR/pqvl#annex-b--attestation--drift-examples-informative](https://github.com/rosieRRRRR/pqvl#annex-b--attestation--drift-examples-informative)
+### **[ANNEX A — Probe Examples (INFORMATIVE)](#annex-a--probe-examples-informative)**
 
-## **ANNEX C — Developer Workflow Examples (INFORMATIVE)**  
-[https://github.com/rosieRRRRR/pqvl#annex-c--developer-workflow-examples-informative](https://github.com/rosieRRRRR/pqvl#annex-c--developer-workflow-examples-informative)
+### **[ANNEX B — Attestation & Drift Examples (INFORMATIVE)](#annex-b--attestation--drift-examples-informative)**
+
+### **[ANNEX C — Developer Workflow Examples (INFORMATIVE)](#annex-c--developer-workflow-examples-informative)**
+
+---
+
+# **[ACKNOWLEDGEMENTS (INFORMATIVE)](#acknowledgements-informative)**
 
 ---
 
