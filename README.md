@@ -6,168 +6,32 @@ An Open Standard for Runtime Integrity Verification
 **Status:** Implementation Ready. Validation Test Required.
 **Author:** rosiea
 **Contact:** [PQRosie@proton.me](mailto:PQRosie@proton.me)
-**Date:** November 2025
+**Date:** December 2025
 **Licence:** Apache License 2.0 — Copyright 2025 rosiea
 
------
+---
 
 ### **SUMMARY**
 
-The **Post-Quantum Verification Layer (PQVL)** establishes a deterministic, cryptographically enforced standard for runtime integrity verification, serving as the foundational trust anchor for the post-quantum era. It replaces opaque, trust-based assumptions about execution environments with transparent, verification-based artifacts that are reproducible across any device, operating system, or deployment model.
+The Post-Quantum Verification Layer (PQVL) establishes a deterministic, cryptographically enforced standard for runtime integrity verification, serving as the foundational trust anchor for the post-quantum era. It replaces opaque, trust-based assumptions about execution environments with transparent, verification-based artifacts that are reproducible across any device, operating system, or deployment model.
 
-PQVL cryptographically attests that a runtime is safe for high-risk operations only when all core predicates evaluate to true:
-- **`valid_signature`** — Valid ML-DSA-65 signature
-- **`valid_tick`** — Fresh, monotonic Epoch Clock tick
-- **`valid_freshness`** — Tick within stipulated window (≤900 seconds)
-- **`valid_required_probes`** — All mandatory probes present and canonical
-- **`(drift_state == "NONE")`** — No integrity drift detected
+PQVL cryptographically attests runtime integrity by producing an AttestationEnvelope whose validity and drift_state are evaluated by consuming systems to derive `valid_runtime`. The AttestationEnvelope itself requires verification of:
 
-**Core Components:**
-1. **Canonical Probes** — Four required probe classes (`system_state`, `process_state`, `integrity_state`, `policy_state`) with deterministic measurement
-2. **AttestationEnvelope** — Signed aggregate of probe results with drift classification and tick binding
-3. **Drift Classification** — Deterministic rules for NONE/WARNING/CRITICAL states with fail-closed enforcement
-4. **Tick Freshness** — Epoch Clock binding for replay protection and temporal validity
-5. **Ecosystem Integration** — Authoritative runtime predicates for PQSF (`valid_runtime`), PQHD (`valid_device`), and PQAI (`valid_runtime`)
-6. **Transport & Ledger** — Secure transport (TLSE-EMP/STP) with canonical ledger events for auditability
+* **Valid Envelope:** Includes `valid_signature`, `valid_tick`, `valid_freshness`, and canonical encoding.
+* **Integrity State:** All required probes present, canonical, and compared to the security baseline.
+* **Final Predicate:** The ultimate authority on safety is the runtime state classification (`drift_state == "NONE"`).
+
+Core Components:
+
+1. Canonical Probes — Four required probe classes (`system_state`, `process_state`, `integrity_state`, `policy_state`) with deterministic measurement
+2. AttestationEnvelope — Signed aggregate of probe results with drift classification and tick binding
+3. Drift Classification — Deterministic rules for NONE/WARNING/CRITICAL states with fail-closed enforcement
+4. Tick Freshness — Epoch Clock binding for replay protection and temporal validity
+5. Ecosystem Integration — Authoritative runtime predicates for PQSF (`valid_runtime`), PQHD (`valid_device`), and PQAI (`valid_runtime`)
+6. Transport & Ledger — Secure transport (TLSE-EMP/STP) with canonical ledger events for auditability
 
 PQVL enables wallets, AI systems, and policy engines to operate exclusively under verified safe runtime conditions, making tampering, misconfiguration, and state drift detectable and cryptographically enforced.
 
----
-
-# **INDEX**
-
-### **[ABSTRACT](#abstract)**
-
-### **[PROBLEM STATEMENT](#problem-statement)**
-
----
-
-## **1. PURPOSE AND SCOPE (NORMATIVE)**
-
-* [1.1 Purpose](#11-purpose)
-* [1.1A Trust-Minimisation (INFORMATIVE)](#11a-trust-minimisation-informative)
-* [1.2 Scope](#12-scope)
-* [1.3 Relationship to PQSF](#13-relationship-to-pqsf)
-* [1.4 Relationship to PQHD](#14-relationship-to-pqhd)
-* [1.5 Relationship to PQAI](#15-relationship-to-pqai)
-* [1.6 Relationship to Epoch Clock](#16-relationship-to-epoch-clock)
-
----
-
-## **2. ARCHITECTURE OVERVIEW (NORMATIVE)**
-
-* [2.1 Components](#21-components)
-* [2.2 Data Flow Overview](#22-data-flow-overview)
-* [2.3 Trust Model](#23-trust-model)
-* [2.3.1 Offline and Sovereign Operation](#231-offline-and-sovereign-operation)
-* [2.4 Device Identity Models (NORMATIVE)](#24-device-identity-models-normative)
-
-  * [2.4.1 Attested Device Identity](#241-attested-device-identity)
-  * [2.4.2 Minimal Device Identity](#242-minimal-device-identity-no-pqvl-present)
-  * [2.4.3 Identity Selection Rules](#243-identity-selection-rules)
-
----
-
-## **3. CRYPTOGRAPHIC PRIMITIVES (NORMATIVE)**
-
-* [3.1 Signature Requirements (ML-DSA-65)](#31-signature-requirements)
-* [3.2 Hash Functions (SHAKE256-256)](#32-hash-functions)
-* [3.3 Domain Separation](#33-domain-separation)
-* [3.4 Canonical Encoding](#34-canonical-encoding)
-
----
-
-## **4. ATTESTATION MODEL & PROBE STRUCTURES (NORMATIVE)**
-
-* [4.1 Probe Types](#41-probe-types)
-* [4.2 ProbeResult Structure](#42-proberesult-structure)
-* [4.3 AttestationEnvelope Structure](#43-attestationenvelope-structure)
-* [4.4 Attestation Validation Rules](#44-attestation-validation-rules)
-* [4.5 Required Probes per Enforcement](#45-required-probes-per-enforcement)
-
----
-
-## **5. DRIFT CLASSIFICATION & SEMANTICS (NORMATIVE)**
-
-* [5.1 Drift States](#51-drift-states)
-* [5.2 Drift Predicate](#52-drift-predicate)
-* [5.3 Impact on Consumers](#53-impact-on-consumers)
-* [5.4 Required Probe Baseline Comparison](#54-required-probe-baseline-comparison)
-* [5.5 Drift MUST Fail-Closed](#55-drift-must-fail-closed)
-
----
-
-## **6. PQSF INTEGRATION (NORMATIVE)**
-
-* [6.1 Probe API Integration](#61-probe-api-integration)
-* [6.2 Tick Validation](#62-tick-validation)
-* [6.3 Exporter Binding](#63-exporter-binding)
-* [6.4 Ledger Integration](#64-ledger-integration)
-* [6.5 Fail-Closed Enforcement](#65-fail-closed-enforcement)
-
----
-
-## **7. PQHD INTEGRATION (NORMATIVE)**
-
-* [7.1 Required Condition](#71-required-condition)
-* [7.2 Continuous Predicate-Scoped Checks](#72-continuous-predicate-scoped-checks)
-* [7.3 Impact on Recovery & Secure Import](#73-impact-on-recovery--secure-import)
-* [7.4 Canonical PQVL Handling](#74-canonical-pqvl-handling)
-
----
-
-## **8. PQAI INTEGRATION (NORMATIVE)**
-
-* [8.1 Required Condition](#81-required-condition)
-* [8.2 PQVL Enforcement During Fingerprinting](#82-pqvl-enforcement-during-fingerprinting)
-* [8.3 PQVL Enforcement During Safe-Prompt Flows](#83-pqvl-enforcement-during-safe-prompt-flows)
-* [8.4 PQAI Probe API Integration](#84-pqai-probe-api-integration)
-
----
-
-## **9. TRANSPORT REQUIREMENTS (NORMATIVE)**
-
-* [9.1 Deterministic Transport (TLSE-EMP / STP)](#91-deterministic-transport)
-* [9.2 Offline Operation](#92-offline-operation)
-* [9.3 Stealth Mode](#93-stealth-mode)
-
----
-
-## **10. CANONICALISATION RULES (NORMATIVE)**
-
-* [10.1 Canonical AttestationEncoding](#101-canonical-attestationencoding)
-* [10.2 Probe Canonicalisation](#102-probe-canonicalisation)
-* [10.3 Baseline Hash Canonicalisation](#103-baseline-hash-canonicalisation)
-
----
-
-## **11. ERROR CODES (NORMATIVE)**
-
----
-
-## **12. SECURITY CONSIDERATIONS (INFORMATIVE)**
-
----
-
-## **13. IMPLEMENTATION NOTES (INFORMATIVE)**
-
----
-
-## **14. BACKWARDS COMPATIBILITY (INFORMATIVE)**
-
----
-
-# **ANNEXES**
-
-### **[ANNEX A — Probe Examples (INFORMATIVE)](#annex-a--probe-examples-informative)**
-
-### **[ANNEX B — Attestation & Drift Examples (INFORMATIVE)](#annex-b--attestation--drift-examples-informative)**
-
-### **[ANNEX C — Developer Workflow Examples (INFORMATIVE)](#annex-c--developer-workflow-examples-informative)**
-
----
-
-# **[ACKNOWLEDGEMENTS (INFORMATIVE)](#acknowledgements-informative)**
 
 ---
 
@@ -180,6 +44,94 @@ Unlike proprietary hardware enclaves or cloud-dependent attestation services, PQ
 As the mandatory root of trust for the broader PQ* stack, including PQHD wallets and PQAI alignment systems, PQVL enforces a strict fail-closed security model. No high-risk operation proceeds under a compromised or unverified runtime. Its attestation envelopes, post-quantum ML-DSA-65 signatures, tick-bound freshness, and deterministic drift classification create a universal basis for trust that functions identically in online, offline, air-gapped, and fully sovereign environments.
 
 PQVL is not an incremental improvement but an architectural shift that replaces opaque and centralized trust mechanisms with a transparent, user-controlled, and universally verifiable standard for runtime integrity.
+
+---
+
+## **INDEX**
+
+1. [Purpose and Scope](#1-purpose-and-scope-normative)
+   1.1 [Purpose](#11-purpose)
+   1.2 [Scope](#12-scope)
+   1.3 [Trust-Minimisation](#13-trust-minimisation-informative)
+   1.4 [Implementation Scope](#14-implementation-scope-non-normative-clarification)
+   1.5 [Conformance and Deployment Profiles](#15-conformance-and-deployment-profiles-non-normative-clarification)
+   1.6 [Relationship to PQSF](#16-relationship-to-pqsf)
+   1.7 [Relationship to PQHD](#17-relationship-to-pqhd)
+   1.8 [Relationship to PQAI](#18-relationship-to-pqai)
+   1.9 [Relationship to Epoch Clock](#19-relationship-to-epoch-clock)
+
+2. [Architecture Overview](#2-architecture-overview-normative)
+   2.1 [Components](#21-components)
+   2.2 [Data Flow Overview](#22-data-flow-overview)
+   2.3 [Trust Model](#23-trust-model)
+   2.3.1 [Offline and Sovereign Operation](#231-offline-and-sovereign-operation)
+   2.4 [Device Identity Models](#24-device-identity-models-normative)
+   2.4.1 [Attested Device Identity](#241-attested-device-identity)
+   2.4.2 [Minimal Device Identity](#242-minimal-device-identity-no-pqvl-present)
+   2.4.3 [Identity Selection Rules](#243-identity-selection-rules)
+
+3. [Cryptographic Primitives](#3-cryptographic-primitives-normative)
+   3.1 [Signature Requirements](#31-signature-requirements)
+   3.2 [Hash Functions](#32-hash-functions)
+   3.3 [Domain Separation](#33-domain-separation)
+   3.4 [Canonical Encoding](#34-canonical-encoding)
+
+4. [Attestation Model and Probe Structures](#4-attestation-model--probe-structures-normative)
+   4.1 [Probe Types](#41-probe-types)
+   4.2 [ProbeResult Structure](#42-proberesult-structure)
+   4.3 [AttestationEnvelope Structure](#43-attestationenvelope-structure)
+   4.4 [Attestation Validation Rules](#44-attestation-validation-rules)
+   4.5 [Required Probes per Enforcement](#45-required-probes-per-enforcement)
+
+5. [Drift Classification and Semantics](#5-drift-classification--semantics-normative)
+   5.1 [Drift States](#51-drift-states)
+   5.2 [Drift Predicate](#52-drift-predicate)
+   5.3 [Impact on Consumers](#53-impact-on-consumers)
+   5.4 [Required Probe Baseline Comparison](#54-required-probe-baseline-comparison)
+   5.5 [Drift Must Fail-Closed](#55-drift-must-fail-closed)
+
+6. [PQSF Integration](#6-pqsf-integration-normative)
+   6.1 [Probe API Integration](#61-probe-api-integration)
+   6.2 [Tick Validation](#62-tick-validation)
+   6.3 [Exporter Binding](#63-exporter-binding)
+   6.4 [Ledger Integration](#64-ledger-integration)
+   6.5 [Fail-Closed Enforcement](#65-fail-closed-enforcement)
+
+7. [PQHD Integration](#7-pqhd-integration-normative)
+   7.1 [Required Condition](#71-required-condition)
+   7.2 [Continuous Predicate-Scoped Checks](#72-continuous-predicate-scoped-checks)
+   7.3 [Impact on Recovery and Secure Import](#73-impact-on-recovery--secure-import)
+   7.4 [Canonical PQVL Handling](#74-canonical-pqvl-handling)
+
+8. [PQAI Integration](#8-pqai-integration-normative)
+   8.1 [Required Condition](#81-required-condition)
+   8.2 [PQVL Enforcement During Fingerprinting](#82-pqvl-enforcement-during-fingerprinting)
+   8.3 [PQVL Enforcement During Safe-Prompt Flows](#83-pqvl-enforcement-during-safe-prompt-flows)
+   8.4 [PQAI Probe API Integration](#84-pqai-probe-api-integration)
+
+9. [Transport Requirements](#9-transport-requirements-normative)
+   9.1 [Deterministic Transport](#91-deterministic-transport)
+   9.2 [Offline Operation](#92-offline-operation)
+   9.3 [Stealth Mode](#93-stealth-mode)
+
+10. [Canonicalisation Rules](#10-canonicalisation-rules-normative)
+    10.1 [Canonical Attestation Encoding](#101-canonical-attestationencoding)
+    10.2 [Probe Canonicalisation](#102-probe-canonicalisation)
+    10.3 [Baseline Hash Canonicalisation](#103-baseline-hash-canonicalisation)
+
+11. [Error Codes](#11-error-codes-normative)
+
+12. [Security Considerations](#12-security-considerations-informative)
+
+13. [Implementation Notes](#13-implementation-notes-informative)
+
+14. [Backwards Compatibility](#14-backwards-compatibility-informative)
+
+Annexes
+
+* [Annex A — Probe Examples](#annex-a--probe-examples-informative)
+* [Annex B — Attestation and Drift Examples](#annex-b--attestation--drift-examples-informative)
+* [Annex C — Developer Workflow Examples](#annex-c--developer-workflow-examples-informative)
 
 ---
 
@@ -276,13 +228,36 @@ PQVL does **not** define:
 
 PQVL specifies **what** must be represented and **how** it must be validated, without constraining the underlying measurement mechanisms used to generate probe data.
 
----
-
-## **1.1A Trust-Minimisation (Informative)**
+## **1.3 Trust-Minimisation (INFORMATIVE)**
 
 PQVL operates under a strict trust-minimisation model. It does not assume trust in the operating system, hardware vendor, firmware, cloud infrastructure, or external attestation authorities. All runtime-integrity claims derive from explicit, deterministic probes and post-quantum signatures. Expected baselines, policy definitions, and probe configurations may be audited, forked, or replaced without dependency on proprietary mechanisms or centralised control.
 
 PQVL MUST function in offline, air-gapped, and sovereign environments. Attestation generation, drift classification, and envelope validation MUST remain fully operational without remote services, cloud APIs, or vendor-managed trust modules. Verification is local, deterministic, and reproducible across devices, allowing runtime integrity to remain verifiable even in adversarial or disconnected conditions.
+
+## **1.4 Implementation Scope (Non-Normative Clarification)**
+
+PQVL specifies the verification interface, canonical structures, predicates, and failure semantics consumed by relying applications.
+
+The implementation of attestation agents, OS-specific measurement mechanics, and platform-dependent probe execution is explicitly out of scope for this specification and MAY vary by operating system, hardware platform, vendor, or deployment model.
+
+Any such implementation is acceptable provided that the resulting AttestationEnvelope satisfies all normative verification rules, canonical encoding requirements, and drift-state semantics defined herein.
+
+## **1.5 Conformance and Deployment Profiles (Non-Normative Clarification)**
+
+PQVL defines a single conformance model.
+
+An implementation is PQVL-conformant if it correctly implements all normative verification rules defined in this specification, including:
+
+* AttestationEnvelope structure and canonical encoding;
+* required probe presence and status semantics;
+* drift classification (NONE / WARNING / CRITICAL);
+* Epoch Clock tick binding, freshness, and monotonicity checks;
+* ML-DSA-65 signature verification;
+* mandatory fail-closed behaviour on verification failure.
+
+PQVL does not define multiple conformance tiers or operational profiles. It specifies verification semantics only.
+
+Relying specifications and deployments (for example PQHD Custody (Baseline), PQHD Custody (Enterprise), or PQAI high-risk flows) MAY impose stricter operational or policy requirements such as attestation refresh cadence, key storage constraints, additional baseline enforcement, or governance rules. Such requirements are external to PQVL and MUST NOT modify or weaken PQVL’s normative verification semantics.
 
 ---
 
@@ -324,7 +299,7 @@ Informative annexes provide examples, workflows, and reference patterns for prob
 
 ---
 
-## **1.3 Relationship to PQSF**
+## **1.6 Relationship to PQSF**
 
 PQSF defines the transport, temporal, encoding, and ledger rules that PQVL attestations must follow. PQVL MUST integrate with PQSF as follows:
 
@@ -355,32 +330,33 @@ function pqsf_evaluate_runtime(attestation, current_tick, window):
     return { valid_runtime: true, warning: false }
 ```
 
-## **1.4 Relationship to PQHD**
+---
+
+## **1.7 Relationship to PQHD**
 
 PQHD uses PQVL to implement the `valid_device` predicate:
 
+```
 valid_device = (PQVL.drift_state == "NONE")
-
-PQHD MUST:
-
-* request PQVL attestation before signing
-* treat any PQVL drift CRITICAL as `valid_device = false`
-* block all signatures if PQVL attestation fails or expires
-
-PQVL does not know anything about PSBTs, keys, or wallet policies; it reports runtime integrity only (see PQHD 12).
-
-### Pseudocode (Informative) — PQHD Device Predicate
-
-```
-// PQHD device validity predicate using PQVL
-function pqhd_valid_device(attestation, current_tick, window):
-    if not pqvl_validate_envelope(attestation, current_tick, window):
-        return false
-
-    return (attestation.drift_state == "NONE")
 ```
 
-## **1.5 Relationship to PQAI**
+### **Tier Alignment (Normative)**
+
+The following alignment applies when PQVL is consumed by PQHD:
+
+* **PQHD Custody (Baseline)** and **PQHD Custody (Enterprise)**
+  MUST require PQVL attestation prior to any signing operation and MUST treat any PQVL drift state other than `NONE` as `valid_device = false`.
+
+* **Transactional Profile (Non-Custodial Profile)**
+  MAY consume PQVL attestations when present but MUST NOT claim custody-grade guarantees and MUST NOT be described or marketed as PQHD Custody.
+
+PQVL does not define custody tiers and does not differentiate behaviour based on PQHD tier. Tier-specific guarantees are enforced by PQHD policy, quorum, and ledger predicates, not by PQVL.
+
+PQVL does not process PSBTs, keys, consent, or wallet policy. It reports runtime integrity only.
+
+---
+
+## **1.8 Relationship to PQAI**
 
 PQAI uses PQVL to implement the `valid_runtime` predicate:
 
@@ -403,7 +379,7 @@ function pqai_valid_runtime(attestation, current_tick, window):
     return (attestation.drift_state == "NONE")
 ```
 
-## **1.6 Relationship to Epoch Clock**
+## **1.9 Relationship to Epoch Clock**
 
 PQVL MUST bind all attestation results to Epoch Clock ticks:
 
@@ -503,30 +479,22 @@ PQVL does **not** assume:
 * hardware-based TPM/TEE existence (though it can consume them if present);
 * network connectivity (works offline).
 
-## 2.3.1 Offline and Sovereign Operation
+## **2.3.1 Offline and Sovereign Operation**
 
-PQVL MUST NOT rely on remote servers or proprietary verification endpoints.
-Attestation and drift classification MUST function in offline, air-gapped, and
-sovereign network environments. This ensures that runtime integrity can be
-verified without external trust dependencies and preserves user control across
-all deployment conditions.
+PQVL MUST NOT rely on remote servers or proprietary verification endpoints. Attestation and drift classification MUST function in offline, air-gapped, and sovereign network environments. This ensures that runtime integrity can be verified without external trust dependencies and preserves user control across all deployment conditions.
 
 ## **2.4 Device Identity Models (NORMATIVE)**
 
-PQVL defines two device identity models for use by PQSF, PQHD, PQAI, and other
-consumers:
+PQVL defines two device identity models for use by PQSF, PQHD, PQAI, and other consumers:
 
 1. **Attested Device Identity** — when PQVL attestation is available.
-2. **Minimal Device Identity** — when PQVL is not present or attestation is
-   unavailable (e.g., bootstrap, offline, air-gapped, or constrained devices).
+2. **Minimal Device Identity** — when PQVL is not present or attestation is unavailable (e.g., bootstrap, offline, air-gapped, or constrained devices).
 
-Both identity models MUST be canonical, deterministic, and stable across
-sessions for a given device.
+Both identity models MUST be canonical, deterministic, and stable across sessions for a given device.
 
 ### **2.4.1 Attested Device Identity**
 
-When PQVL attestation is available, the authoritative device identity MUST be
-derived from the attestation public key and the measured runtime state.
+When PQVL attestation is available, the authoritative device identity MUST be derived from the attestation public key and the measured runtime state.
 
 ```
 DeviceIdentity_PQVL = {
@@ -540,12 +508,9 @@ DeviceIdentity_PQVL = {
 Requirements:
 
 * MUST be encoded using deterministic CBOR or JCS JSON.
-* `measurement_hash` and `sandbox_hash` MUST be computed over canonical
-  representations of measured state.
-* `device_attest_pub` MUST correspond to the key used to sign
-  AttestationEnvelopes.
-* Identity MUST remain stable while the firmware and runtime configuration
-  remain unchanged.
+* `measurement_hash` and `sandbox_hash` MUST be computed over canonical representations of measured state.
+* `device_attest_pub` MUST correspond to the key used to sign AttestationEnvelopes.
+* Identity MUST remain stable while the firmware and runtime configuration remain unchanged.
 
 ### Pseudocode (Informative) — Building Attested Device Identity
 
@@ -567,8 +532,7 @@ function pqvl_build_device_identity_pqvl(attest_pub, firmware_state, sandbox_sta
 
 ### **2.4.2 Minimal Device Identity (No PQVL Present)**
 
-If PQVL cannot provide attestation, a deterministic fallback identity MAY be
-used.
+If PQVL cannot provide attestation, a deterministic fallback identity MAY be used.
 
 ```
 DeviceIdentity_Minimal = {
@@ -580,15 +544,11 @@ DeviceIdentity_Minimal = {
 
 Requirements:
 
-* `device_pub` MUST be derived deterministically (e.g., PQHD-DF with
-  `class_id = "device"`).
-* MUST NOT depend on system clocks, random identifiers, or vendor serial
-  numbers.
+* `device_pub` MUST be derived deterministically (e.g., PQHD-DF with `class_id = "device"`).
+* MUST NOT depend on system clocks, random identifiers, or vendor serial numbers.
 * MUST remain stable unless re-provisioned or rotated by governance.
 
-Minimal Device Identity is unauthenticated but MAY be used for multisig role
-assignment, ledger tracking, and delegated authority in non-attested
-deployments.
+Minimal Device Identity is unauthenticated but MAY be used for multisig role assignment, ledger tracking, and delegated authority in non-attested deployments.
 
 ### Pseudocode (Informative) — Minimal Device Identity
 
@@ -607,16 +567,14 @@ function pqvl_build_device_identity_minimal(device_pub):
 
 Consumers MUST apply the following precedence:
 
-1. If a valid PQVL AttestationEnvelope is available and drift_state = "NONE",
-DeviceIdentity_PQVL MUST be used.
+1. If a valid PQVL AttestationEnvelope is available and drift_state = "NONE", DeviceIdentity_PQVL MUST be used.
 2. If PQVL attestation is unavailable, DeviceIdentity_Minimal MAY be used.
-3. If no valid identity can be established, the device MUST be treated as
-untrusted and MUST NOT perform high-risk operations.
+3. If no valid identity can be established, the device MUST be treated as untrusted and MUST NOT perform high-risk operations.
 
-Device identity provides a stable surface for PQHD, PQAI, and other modules to
-bind roles, enforce policies, and attribute ledger events.
+Device identity provides a stable surface for PQHD, PQAI, and other modules to bind roles, enforce policies, and attribute ledger events.
 
 ### **Pseudocode (Informative) — Identity Selection**
+
 ```
 // Choose device identity based on PQVL availability
 function select_device_identity(attestation, pqvl_identity, minimal_identity, current_tick, window):
@@ -665,7 +623,6 @@ function pqvl_verify_envelope_signature(pk_pq, envelope):
     return verify_pq(pk_pq, bytes, signature)
 ```
 
-
 ## **3.2 Hash Functions**
 
 PQVL MUST use:
@@ -704,12 +661,7 @@ function pqvl_hash_with_domain(domain, payload_bytes):
 
 ## **3.4 Canonical Encoding**
 
-All PQVL structures MUST be encoded as:
-
-* deterministic CBOR, or
-* JCS JSON,
-
-as defined in PQSF.
+All PQVL structures MUST be encoded as deterministic CBOR or JCS JSON, as defined in PQSF.
 
 Non-canonical encodings MUST be rejected.
 
@@ -797,50 +749,27 @@ function run_system_state_probe(env):
     }
 ```
 
-## **4.3 AttestationEnvelope Structure**
-
-PQVL MUST aggregate ProbeResults into an AttestationEnvelope:
+### **4.3 AttestationEnvelope Structure**
 
 AttestationEnvelope = {
-  "envelope_id":    bstr,
-  "probes":         [* ProbeResult],
-  "drift_state":    tstr,   ; "NONE" | "WARNING" | "CRITICAL"
-  "tick":           uint,
-  "signature_pq":   bstr
+"envelope_id": bstr,
+"probes": [* ProbeResult],
+"drift_state": tstr,        ; "NONE" | "WARNING" | "CRITICAL"
+"tick": uint,
+"exporter_hash": bstr / null,
+"signature_pq": bstr
 }
 
-`envelope_id` SHOULD be computed as:
+The `envelope_id` SHOULD be computed as:
 
-    SHAKE256-256(canonical(envelope_without_signature))
+SHAKE256-256(canonical(envelope_without_signature))
 
-where `envelope_without_signature` is the AttestationEnvelope object with the
-`signature_pq` field removed.
+where `envelope_without_signature` is the AttestationEnvelope object with the `signature_pq` field removed.
 
-`drift_state` MUST be computed according to §5.
+If a PQSF transport session exists and provides an exporter hash, PQVL MUST embed that value in `exporter_hash`. If no PQSF session exists, `exporter_hash` MUST be null. Consumers MUST treat exporter mismatches as attestation invalidity.
 
-### **Pseudocode (Informative) — Building an AttestationEnvelope**
+The `drift_state` MUST be computed according to §5.
 
-```
-// Build an AttestationEnvelope from probes and drift_state
-function build_attestation_envelope(probes, drift_state, tick, sk_pq):
-    envelope = {
-        envelope_id:  null,
-        probes:       probes,
-        drift_state:  drift_state,
-        tick:         tick,
-        signature_pq: null
-    }
-
-    tmp = clone(envelope)
-    tmp.signature_pq = null
-
-    bytes = canonical_encode(tmp)
-
-    envelope.envelope_id = pqvl_hash_with_domain("PQVL-Attestation", bytes)
-    envelope.signature_pq = sign_pq(sk_pq, bytes)
-
-    return envelope
-```
 
 ## **4.4 Attestation Validation Rules**
 
@@ -884,13 +813,23 @@ function pqvl_validate_envelope(envelope, current_tick, window):
 
 ## **4.5 Required Probes per Enforcement**
 
-PQHD and PQAI MUST treat the following as mandatory:
+PQAI MUST treat the following as mandatory:
 
 * `system_state`
 * `process_state`
 * `integrity_state`
 
 `policy_state` SHOULD be mandatory where local policy modules exist.
+
+PQHD Custody (Baseline) and PQHD Custody (Enterprise) MUST treat the following as mandatory:
+
+* `system_state`
+* `process_state`
+* `integrity_state`
+
+`policy_state` SHOULD be mandatory where local policy modules exist.
+
+Transactional Profile (Non-Custodial Profile) MAY consume PQVL when present, but it MUST NOT weaken any PQVL validation rules and MUST NOT claim custody-grade guarantees.
 
 ### Pseudocode (Informative) — Required Probe Check
 
@@ -925,12 +864,15 @@ PQVL MUST use the following drift states:
 
 PQVL MUST compute `drift_state` using the following deterministic rules:
 
-    drift_state = CRITICAL    if any required probe has status == "invalid"
-    drift_state = WARNING     if no required probe is invalid AND at least one probe has status == "warning"
-    drift_state = NONE        otherwise
+```
+drift_state = CRITICAL    if any required probe has status == "invalid"
+drift_state = WARNING     if no required probe is invalid AND at least one probe has status == "warning"
+drift_state = NONE        otherwise
+```
 
 ### **Pseudocode (Informative) — Drift Classification Core**
 
+```
 // Classify drift based on probe statuses
 function pqvl_classify_drift_from_statuses(probes):
     required_types = ["system_state", "process_state", "integrity_state"]
@@ -946,6 +888,7 @@ function pqvl_classify_drift_from_statuses(probes):
         return "WARNING"
 
     return "NONE"
+```
 
 ## **5.3 Impact on Consumers**
 
@@ -985,29 +928,93 @@ function pqvl_compare_probe_to_baseline(probe, baseline_details):
     return "invalid"
 ```
 
-## **5.5 Drift MUST Fail-Closed**
+---
 
-If drift_state transitions to CRITICAL:
+## **5.5 Drift MUST Fail-Closed (Revised)**
 
-* PQVL MUST include this in AttestationEnvelope
-* PQVL MUST block further attestation generation until baseline is reloaded or drift resolved
-* PQVL MUST require fresh PQSF Tick before resuming
-* PQSF, PQHD, and PQAI MUST treat all dependent predicates as invalid
+Upon detection of integrity drift, PQVL MUST transition `drift_state` to WARNING or CRITICAL and include this value in the generated AttestationEnvelope.
 
-### Pseudocode (Informative) — Attestation Freeze on CRITICAL Drift
+If `drift_state` is CRITICAL:
+
+* The generated AttestationEnvelope MUST include `drift_state = "CRITICAL"`.
+* Consumers MUST treat `drift_state = "CRITICAL"` as an invalid runtime condition and MUST fail-closed.
+* Operational enforcement, retry suppression, lockout, and recovery semantics are governed exclusively by **PQSF §7.9.1** (Fail-Closed Policy) and **PQSF §7.9.2** (Deterministic Lockout and Backoff).
+
+PQVL MUST NOT define, implement, or require any local enforcement, retry, lockout, or recovery behaviour beyond producing the AttestationEnvelope and deterministic drift classification.
+
+---
+
+## **5.6 Attestation Lease (NORMATIVE)**
+
+An AttestationLease is a short-lived, non-authoritative optimisation artefact derived from a fully validated AttestationEnvelope. It exists solely to reduce redundant recomputation for **Non-Authoritative** operations, as defined in **PQSF §7.9.4**.
+
+### **5.6.1 Structure**
 
 ```
-// Enforce freeze when drift_state becomes CRITICAL
-function pqvl_handle_critical_drift(env, envelope):
-    if envelope.drift_state != "CRITICAL":
-        return
 
-    env.attestation_frozen = true
-    PQSF.ledger_append_runtime_event(envelope)
+AttestationLease = {
+lease_id:          tstr,
+envelope_id:       tstr,
+lease_tick:        uint,
+lease_expiry_tick: uint,
+exporter_hash:     bstr / null,
+signature_pq:      bstr
+}
 
-    // Subsequent calls must refuse to attest until reset
-    // env.attestation_frozen can only be cleared by governance action
 ```
+
+All fields MUST be canonically encoded.  
+`signature_pq` MUST be a valid ML-DSA-65 signature over the canonical payload excluding `signature_pq`.
+
+---
+
+### **5.6.2 Issuance Rules**
+
+A lease MAY be issued only if the source AttestationEnvelope is:
+
+* canonically encoded;
+* signature-valid;
+* tick-fresh and monotonic;
+* `drift_state == "NONE"`.
+
+`lease_expiry_tick` MUST be less than or equal to the originating attestation freshness window and MUST NOT exceed 900 seconds from `lease_tick`.
+
+If a transport session exists, `exporter_hash` MUST be bound to the active session.  
+If the source AttestationEnvelope contained `exporter_hash = null`, the lease `exporter_hash` MUST also be `null`.
+
+Issuance MUST be deterministic and reproducible.
+
+---
+
+### **5.6.3 Consumption Rules (Streamlined)**
+
+An AttestationLease MAY be consumed **exclusively** for **Non-Authoritative** operations as defined in **PQSF §7.9.4**.
+
+An AttestationLease MUST NOT be consumed for any **Authoritative** operation.
+
+Any lease expiry, exporter mismatch, canonicalisation failure, or verification failure MUST trigger **fail-closed behaviour** consistent with **PQSF §7.9.1**.
+
+---
+
+### **5.6.4 Revocation**
+
+An AttestationLease MUST be considered immediately invalid if:
+
+* a subsequent AttestationEnvelope is issued for the same device;
+* any PQVL event yields `drift_state != "NONE"`;
+* the associated EpochTick becomes invalid or non-monotonic.
+
+Lease invalidation MUST be treated as equivalent to attestation failure and MUST propagate synchronously to all dependent operations.
+
+---
+
+## **5.7 Failure Backoff and Lockout (NORMATIVE) (Streamlined)**
+
+Implementations MUST enforce **Deterministic Lockout and Backoff** consistent with **PQSF §7.9.2**.
+
+Repeated failures of critical validation routines MUST result in transition to `FAIL_CLOSED_LOCKED`. While locked, implementations MUST suppress retries for **Authoritative** operations and MUST NOT reuse cached artefacts, leases, or prior validation results.
+
+Exit from lockout MUST satisfy the conditions defined in **PQSF §7.9.2**.
 
 ---
 
@@ -1048,17 +1055,17 @@ PQVL MUST validate attestation freshness using authenticated Epoch Clock ticks o
 
 An AttestationEnvelope is valid **only if**:
 
-    envelope.tick >= current_tick - attestation_window
+```
+envelope.tick >= current_tick - attestation_window
+```
 
-The default `attestation_window` is **900 seconds** unless a PQSF-compliant
-deployment applies a stricter bound.
+The default `attestation_window` is **900 seconds** unless a PQSF-compliant deployment applies a stricter bound.
 
-PQVL implementations MUST NOT use system time (RTC, NTP, OS time APIs) for any
-freshness or temporal validation. All time semantics MUST derive exclusively from
-verifiable EpochTicks supplied by PQSF transport or an authenticated local tick cache.
+PQVL implementations MUST NOT use system time (RTC, NTP, OS time APIs) for any freshness or temporal validation. All time semantics MUST derive exclusively from verifiable EpochTicks supplied by PQSF transport or an authenticated local tick cache.
 
 ### **Pseudocode (Informative) — Enforcing Tick Rules**
 
+```
 // Validate attestation tick using Epoch Clock ticks only
 function pqvl_enforce_tick_rules(envelope, current_tick, window):
     if envelope.tick > current_tick:
@@ -1066,6 +1073,7 @@ function pqvl_enforce_tick_rules(envelope, current_tick, window):
     if envelope.tick < current_tick - window:
         return false    // stale tick
     return true
+```
 
 ## **6.3 Exporter Binding**
 
@@ -1153,17 +1161,23 @@ if:
 
 # **7. PQHD INTEGRATION (NORMATIVE)**
 
-PQHD MUST use PQVL to determine `valid_device`.
+PQHD Custody (Baseline) and PQHD Custody (Enterprise) MUST use PQVL as the authoritative source of runtime integrity for the `valid_device` predicate.
+
+PQVL itself is tier-agnostic. It defines a single verification model and does not introduce custody tiers or operational profiles. Any additional requirements related to quorum diversity, guardian participation, deterministic delays, recovery governance, auditability, or institutional controls are enforced by PQHD and MUST NOT alter, weaken, or reinterpret PQVL’s normative verification semantics.
+
+PQVL reports runtime integrity only. It does not evaluate PSBTs, signing policy, consent, quorum satisfaction, or ledger continuity, and it does not participate in custody decision-making beyond supplying the `valid_device` predicate based on attested runtime state.
 
 ## **7.1 Required Condition**
 
-Before any signing attempt, PQHD MUST evaluate:
+Before any signing attempt, PQHD Custody (Baseline) and PQHD Custody (Enterprise) MUST evaluate:
 
 ```
 valid_device = (PQVL.drift_state == "NONE")
 ```
 
 If false → PQHD MUST NOT sign.
+
+Transactional Profile (Non-Custodial Profile) MUST NOT be described or marketed as PQHD Custody. Transactional Profile MAY consume PQVL when present, but it MUST NOT claim custody-grade guarantees under single-device runtime compromise.
 
 ### Pseudocode (Informative) — Signing Gate in PQHD
 
@@ -1182,7 +1196,7 @@ function pqhd_maybe_sign(psbt, env):
 
 ## **7.2 Continuous Predicate-Scoped Checks**
 
-PQHD MUST request a fresh PQVL attestation **immediately before** evaluating:
+PQHD Custody (Baseline) and PQHD Custody (Enterprise) MUST request a fresh PQVL attestation **immediately before** evaluating:
 
 * PSBT canonicalisation
 * bundle_hash computation
@@ -1194,7 +1208,7 @@ PQHD MUST request a fresh PQVL attestation **immediately before** evaluating:
 
 ## **7.3 Impact on Recovery & Secure Import**
 
-Recovery and Secure Import MUST treat any PQVL drift as:
+For PQHD Custody (Baseline) and PQHD Custody (Enterprise), Recovery and Secure Import MUST treat any PQVL drift as:
 
 ```
 valid_device = false
@@ -1204,12 +1218,12 @@ and MUST NOT proceed.
 
 ## **7.4 Canonical PQVL Handling**
 
-PQHD MUST reject AttestationEnvelopes if:
+PQHD Custody (Baseline) and PQHD Custody (Enterprise) MUST reject AttestationEnvelopes if:
 
 * canonicalisation fails
 * any required probe missing
 * signature invalid
-* drift_state = CRITICAL
+* drift_state ≠ NONE
 * tick invalid
 
 ---
@@ -1252,7 +1266,7 @@ Before evaluating a SafePrompt:
 
 * PQVL MUST validate runtime
 * tick MUST be fresh
-* drift_state MUST NOT be CRITICAL
+* drift_state MUST be NONE
 
 ## **8.4 PQAI Probe API Integration**
 
@@ -1440,8 +1454,7 @@ function pqvl_error_from_context(ctx):
 
 # **ANNEX A — Probe Examples (INFORMATIVE)**
 
-Annex A provides examples of PQVL probe structures.
-These examples illustrate typical usage but MUST NOT override the normative requirements defined in §4.
+Annex A provides examples of PQVL probe structures. These examples illustrate typical usage but MUST NOT override the normative requirements defined in §4.
 
 ## **A.1 system_state Probe Example**
 
@@ -1568,12 +1581,7 @@ Annex C provides typical end-to-end workflows for developers implementing PQVL.
 2. Construct ProbeResult objects.
 3. Canonicalise ProbeResult objects.
 4. Evaluate drift state (NONE / WARNING / CRITICAL).
-5. Build AttestationEnvelope:
-
-   * probes
-   * drift_state
-   * tick
-   * envelope_id
+5. Build AttestationEnvelope (probes, drift_state, tick, envelope_id).
 6. Sign envelope with ML-DSA-65.
 7. Return to PQSF/PQHD/PQAI.
 
@@ -1591,18 +1599,10 @@ function pqvl_generate_and_publish(env):
 ## **C.2 Attestation Validation Workflow (Consumer Side)**
 
 1. Validate ML-DSA-65 signature.
-
 2. Validate canonical encoding.
-
 3. Validate tick freshness.
-
 4. Validate required probes exist.
-
-5. Evaluate drift_state:
-
-   * if WARNING → restrict high-risk operations
-   * if CRITICAL → fail closed
-
+5. Evaluate drift_state (WARNING restricts; CRITICAL fails closed).
 6. Commit ledger entry if required.
 
 ### Pseudocode (Informative) — Consumer Validation Wrapper
@@ -1621,29 +1621,23 @@ function consumer_validate_runtime(envelope, current_tick, window):
 
 ## **C.3 Runtime Drift Recovery Workflow**
 
-1. PQVL detects drift WARNING or CRITICAL.
-2. Freeze attestation generation (CRITICAL only).
-3. Refresh or reload expected baseline.
-4. Rerun probes.
-5. Recompute drift_state.
-6. When drift resolved → allow normal operation.
+1. PQVL detects drift WARNING or CRITICAL and produces an AttestationEnvelope reflecting this state.
+2. Consumers (e.g., PQHD, PQAI) receive the AttestationEnvelope and enforce fail-closed and lockout behaviour according to PQSF §7.9.1 and PQSF §7.9.2.
+3. The device operator or autonomous management system initiates remediation (e.g., refresh or reload expected baseline).
+4. PQVL is requested to rerun probes.
+5. PQVL successfully computes a new AttestationEnvelope with `drift_state = "NONE"`.
+6. Consumers receive the clean AttestationEnvelope, satisfy the exit conditions of PQSF §7.9.2, and allow normal operation.
+
 
 ## **C.4 Continuous Attestation Workflow**
 
 Used by PQHD, PQAI, and PQSF.
 
-1. Before each predicate:
-
-   * Request PQVL attestation
-   * Validate runtime integrity
-   * Reject stale envelopes
-
+1. Before each predicate: request PQVL attestation, validate runtime integrity, reject stale envelopes.
 2. Evaluate predicate (policy, signing, fingerprint).
-
 3. Repeat for each predicate in the sequence.
 
 ---
-
 
 ## **Acknowledgements (Informative)**
 
