@@ -1,7 +1,7 @@
 # **PQVL – Post-Quantum Verification Layer**
 
 * **Specification Version:** 1.0.3
-* **Status:** Implementation Ready
+* **Status:** Public beta
 * **Date:** 2026
 **Author:** rosiea
 **Contact:** [PQRosie@proton.me](mailto:PQRosie@proton.me)
