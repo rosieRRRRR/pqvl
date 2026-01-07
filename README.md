@@ -5,7 +5,7 @@
 * **Date:** 2026
 **Author:** rosiea
 **Contact:** [PQRosie@proton.me](mailto:PQRosie@proton.me)
-**Licence:** Apache License 2.0 — Copyright 2025 rosiea
+**Licence:** Apache License 2.0 — Copyright 2026 rosiea
 
 ---
 
