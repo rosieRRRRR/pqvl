@@ -410,6 +410,20 @@ supply_chain_context = {
 
 ---
 
+### 13.3 Supply-Chain Evidence Boundary (Normative)
+
+Supply-chain artefacts referenced by PQVL are descriptive context only.
+
+1. PQVL MUST NOT evaluate, validate, or enforce supply-chain artefacts.
+2. PQVL MAY include supply-chain references inside AttestationEnvelope for correlation purposes only.
+3. Absence, invalidity, or revocation of any supply-chain artefact MUST NOT alter drift classification.
+4. PQVL MUST NOT escalate or downgrade drift_state based on supply-chain evidence.
+5. All enforcement decisions derived from supply-chain artefacts are performed exclusively by PQSEC.
+
+Supply-chain context exists to support deterministic enforcement by consuming specifications and MUST NOT be interpreted as authority, trust, or approval.
+
+---
+
 ## **14. Drift Classification**
 
 States:
